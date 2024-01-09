@@ -37,6 +37,14 @@ PATHS = {
             FolderType.output_log.name: "account/output/log",
             FolderType.output_mapping.name: "account/output/mapping",
             FolderType.output_file.name: "account/output/file",
+        },
+        ObjectType.activity.name: {
+            FolderType.input_raw.name: "activity/input/raw",
+            FolderType.input_struct.name: "activity/input/struct",
+            FolderType.output_error.name: "activity/output/error",
+            FolderType.output_log.name: "activity/output/log",
+            FolderType.output_mapping.name: "activity/output/mapping",
+            FolderType.output_file.name: "activity/output/file",
         }
     }
 }
@@ -125,7 +133,6 @@ def delete_file(path):
     except Exception as e:
         logging.error(f"DELETE_FILE;Can't delete file {path}. Reason {e}")
 
-
 def split_files_in_folder(object_type, folder_input, folder_output, package=1000):
     path = get_path(object_type, folder_input)
     files = get_files(path)
@@ -139,7 +146,27 @@ def split_files_in_folder(object_type, folder_input, folder_output, package=1000
         split_file(input_path, output_path, file_prefix, package)
 
 
-def write_to_file(file, data):
+def merging_files_in_folder(object_type, folder_input, folder_output,first_line):
+    path = get_path(object_type, folder_input)
+    files = get_files(path)
+    output_path = get_path(object_type, folder_output)
+    output_filename = "resultMappingFile.csv"
+    output_file= f"{output_path}/{output_filename}"
+    # Set headers
+    if first_line is not None and first_line != "":
+        write_to_file(output_file, f"{first_line}")
+    if path is None:
+        print(f"Path {path} doesn't exist")
+        return
+    for f in files:
+        input_path = f"{path}/{f}"
+        with open(input_path, encoding="utf8") as fin:
+            lines = fin.readlines()
+            for i, line in enumerate(lines):
+                write_to_file(output_file, f"{line}",False)
+
+def write_to_file(file, data,escapeSequence = True):
     with open(file, 'a', newline='\n', encoding='utf-8') as file:
-        file.write("\n")
+        if escapeSequence:
+            file.write("\n")
         file.write(data)
