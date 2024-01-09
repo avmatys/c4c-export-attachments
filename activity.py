@@ -12,7 +12,7 @@ def mapping_line(activity, attachment, att_path):
         return ""
     att_name = attachment.get("Name", "")
     att_uuid = attachment.get("ObjectID", "")
-    #att_size = attachment.get("SizeInkB", "")
+    att_size = attachment.get("SizeInkB", "")
     att_creation_date = attachment.get("LastUpdatedOn", "")
     # Get timestamp
     timestamp = int(att_creation_date.replace("/Date(", "").replace(")/", ""))
@@ -27,7 +27,7 @@ def mapping_line(activity, attachment, att_path):
     id = activity.get("ID", "")
     name = activity.get("SubjectName", "")
     type = activity.get("TypeCode", "")
-    line = f"{att_path};{att_name};{uuid};{id};{name};{type};{att_uuid};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type}"
+    line = f"{att_path};{att_name};{uuid};{id};{name};{type};{att_uuid};{att_size};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type}"
     return line
 
 
