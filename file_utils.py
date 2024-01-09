@@ -12,7 +12,8 @@ logging = setup_logger('c4cfile', 'c4c/api/file.log')
 
 HEADERS = {
     ObjectType.account.name:"AttachmentPath;AttachmentName;ObjectType;AccountUUID;AccountID;AccountName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText",
-    ObjectType.activity.name: "AttachmentPath;AttachmentName;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode"
+    ObjectType.activity.name: "AttachmentPath;AttachmentName;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode",
+    ObjectType.oppty.name: "AttachmentPath;AttachmentName;OppotrunityUUID;OpportunityID;OpportunityName;OpportunityTypeCode;OpportunityType;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode,Parameter",
 }
 
 PATHS = {
@@ -32,6 +33,14 @@ PATHS = {
             FolderType.output_log.name: "activity/output/log",
             FolderType.output_mapping.name: "activity/output/mapping",
             FolderType.output_file.name: "activity/output/file",
+        },
+        ObjectType.oppty.name: {
+            FolderType.input_raw.name: "opportunity/input/raw",
+            FolderType.input_struct.name: "opportunity/input/struct",
+            FolderType.output_error.name: "opportunity/output/error",
+            FolderType.output_log.name: "opportunity/output/log",
+            FolderType.output_mapping.name: "opportunity/output/mapping",
+            FolderType.output_file.name: "opportunity/output/file",
         }
     },
     Mode.prod.name: {
@@ -50,6 +59,14 @@ PATHS = {
             FolderType.output_log.name: "activity/output/log",
             FolderType.output_mapping.name: "activity/output/mapping",
             FolderType.output_file.name: "activity/output/file",
+        },
+        ObjectType.oppty.name: {
+            FolderType.input_raw.name: "opportunity/input/raw",
+            FolderType.input_struct.name: "opportunity/input/struct",
+            FolderType.output_error.name: "opportunity/output/error",
+            FolderType.output_log.name: "opportunity/output/log",
+            FolderType.output_mapping.name: "opportunity/output/mapping",
+            FolderType.output_file.name: "opportunity/output/file",
         }
     }
 }

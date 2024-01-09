@@ -2,12 +2,22 @@ from datetime import datetime, date
 import enum
 import threading
 
+import opportunity
+
+
 class ObjectType(enum.Enum):
     account = 1
     activity = 2
     oppty = 3
     techtask = 4
     pricereq = 5
+    charinoopty = 6
+    detspecifhistory = 7
+    specifhistory = 8
+    discountinoopty = 9
+    expertadvice = 10
+    pilotbatch = 11
+    specpaymentterms = 12
 
 
 class Mode(enum.Enum):
@@ -106,6 +116,8 @@ if __name__ == '__main__':
             download_attachments(ObjectType.account, account)
         if mode == 7:
             download_attachments(ObjectType.activity, activity)
+        if mode == 8:
+            download_attachments(ObjectType.oppty, opportunity)
         if mode == 11:
             break
 
