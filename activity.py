@@ -78,7 +78,7 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                         continue
                     # Save data into the file
                     atts = item["ActivityAttachmentFolder"]
-                    id = item.get("ID",None)
+                    item_id = item.get("ID",None)
                     for att in atts:
                         file_content = att.get('Binary', None)
                         filename = att.get('Name', None)
@@ -86,7 +86,7 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                         if file_content is None or filename is None:
                             file_utils.write_to_file(error_path, f"{line}, Binary is not available")
                             continue
-                        att_name = f"{id}_{filename}"
+                        att_name = f"{item_id}_{filename}"
                         att_path = f"{file_folder}/{att_name}"
                         binary = base64.b64decode(file_content)
                         # Skip links (urls)

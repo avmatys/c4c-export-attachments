@@ -61,8 +61,6 @@ def download_attachments(object_type, module):
         threads.append(thread)
         thread.start()
 
-        module.download_attachments(f"{input_path}/{f}", file_path, f"{mapping_path}/{f}", f"{error_path}/{f}",
-                                    f"{log_path}/{f}", 10)
     # Attach threads to curent
     for thread in threads:
         thread.join()

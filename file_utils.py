@@ -10,6 +10,11 @@ logging = setup_logger('c4cfile', 'c4c/api/file.log')
 #logging.basicConfig(level=logging.ERROR, filename="c4c/api/file.log", filemode="a",
 #                    format="%(asctime)s;%(levelname)s;%(message)s;")
 
+HEADERS = {
+    ObjectType.account.name:"AttachmentPath;AttachmentName;ObjectType;AccountUUID;AccountID;AccountName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText",
+    ObjectType.activity.name: "AttachmentPath;AttachmentName;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode"
+}
+
 PATHS = {
     Mode.test.name: {
         ObjectType.account.name: {
@@ -148,16 +153,11 @@ def split_files_in_folder(object_type, folder_input, folder_output, package=1000
 
 def merging_mapping_files(object_type, folder_input, folder_output):
     # Set table headers for each types
-    first_line = None
-    if object_type.name is ObjectType.account.name:
-        first_line = "AttachmentPath;AttachmentName;ObjectType;AccountUUID;AccountID;AccountName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText"
-    if object_type.name is ObjectType.activity.name:
-        first_line = "AttachmentPath;AttachmentName;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode"
-
+    first_line = HEADERS.get(object_type.name, "")
     path = get_path(object_type, folder_input)
     files = get_files(path)
     output_path = get_path(object_type, folder_output)
-    output_filename = "resultMappingFile.csv"
+    output_filename = "mapping.csv"
     output_file= f"{output_path}/{output_filename}"
     # Set headers
     if first_line is not None and first_line != "":
