@@ -14,6 +14,10 @@ def mapping_line(account, attachment, att_path):
     att_uuid = attachment.get("ObjectID", "")
     att_size = attachment.get("SizeInkB", "")
     att_creation_date = attachment.get("LastUpdatedOn", "")
+    # Get timestamp
+    timestamp = int(att_creation_date.replace("/Date(", "").replace(")/", ""))
+    # Calculate standard date format (year-month-day hours:minutes:seconds) for UTC+0
+    att_creation_date_form = datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
     att_creator = attachment.get("LastUpdatedBy", "")
     att_link = attachment.get("DocumentLink", "")
     att_mime = attachment.get("MimeType", "")
@@ -22,7 +26,7 @@ def mapping_line(account, attachment, att_path):
     uuid = account.get("ObjectID", "")
     id = account.get("AccountID", "")
     name = account.get("Name", "")
-    line = f"{att_path};{att_name};Account;{uuid};{id};{name};{att_uuid};{att_size};{att_creator};{att_creation_date};{att_link};{att_mime};{att_type};{att_type_text}"
+    line = f"{att_path};{att_name};Account;{uuid};{id};{name};{att_uuid};{att_size};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type};{att_type_text}"
     return line
 
 
@@ -72,6 +76,7 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                         continue
                     # Save data into the file
                     atts = item["CorporateAccountAttachmentFolder"]
+                    id = item.get("AccountID", "")
                     for att in atts:
                         file_content = att.get('Binary', None)
                         filename = att.get('Name', None)
