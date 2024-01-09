@@ -146,7 +146,14 @@ def split_files_in_folder(object_type, folder_input, folder_output, package=1000
         split_file(input_path, output_path, file_prefix, package)
 
 
-def merging_files_in_folder(object_type, folder_input, folder_output,first_line):
+def merging_mapping_files(object_type, folder_input, folder_output):
+    # Set table headers for each types
+    first_line = None
+    if object_type.name is ObjectType.account.name:
+        first_line = "AttachmentPath;AttachmentName;ObjectType;AccountUUID;AccountID;AccountName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText"
+    if object_type.name is ObjectType.activity.name:
+        first_line = "AttachmentPath;AttachmentName;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode"
+
     path = get_path(object_type, folder_input)
     files = get_files(path)
     output_path = get_path(object_type, folder_output)

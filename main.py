@@ -67,12 +67,7 @@ def download_attachments(object_type, module):
     for thread in threads:
         thread.join()
 
-    # Set table headers for each types
-    if object_type is ObjectType.account:
-        first_line = "AttachmentPath;AttachmentName;ObjectType;AccountUUID;AccountID;AccountName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText"
-    if object_type is ObjectType.activity:
-        first_line = "AttachmentPath;AttachmentName;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode"
-    file_utils.merging_files_in_folder(object_type, FolderType.output_mapping, FolderType.output_file,first_line)
+    file_utils.merging_mapping_files(object_type, FolderType.output_mapping, FolderType.output_file)
 
 def print_menu():
     print('1.  Preprocess Accounts')
