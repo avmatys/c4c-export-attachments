@@ -2,7 +2,6 @@ from datetime import datetime, date
 import enum
 import threading
 
-
 class ObjectType(enum.Enum):
     account = 1
     activity = 2
@@ -30,6 +29,7 @@ MODE = Mode.test
 
 import file_utils
 import account
+import activity
 
 
 # Split big files in small pieces
@@ -46,10 +46,10 @@ def download_attachments(object_type, module):
     input_path = file_utils.get_path(object_type, FolderType.input_struct)
     files = file_utils.get_files(input_path)
     # Get all output folders
-    error_path = file_utils.get_path(ObjectType.account, FolderType.output_error)
-    log_path = file_utils.get_path(ObjectType.account, FolderType.output_log)
-    mapping_path = file_utils.get_path(ObjectType.account, FolderType.output_mapping)
-    file_path = file_utils.get_path(ObjectType.account, FolderType.output_file)
+    error_path = file_utils.get_path(object_type, FolderType.output_error)
+    log_path = file_utils.get_path(object_type, FolderType.output_log)
+    mapping_path = file_utils.get_path(object_type, FolderType.output_mapping)
+    file_path = file_utils.get_path(object_type, FolderType.output_file)
     for f in files:
         # creating threads
         start_time = datetime.now()
@@ -67,6 +67,12 @@ def download_attachments(object_type, module):
     for thread in threads:
         thread.join()
 
+    # Set table headers for each types
+    if object_type is ObjectType.account:
+        first_line = "AttachmentPath;AttachmentName;ObjectType;AccountUUID;AccountID;AccountName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText"
+    if object_type is ObjectType.activity:
+        first_line = "AttachmentPath;AttachmentName;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode"
+    file_utils.merging_files_in_folder(object_type, FolderType.output_mapping, FolderType.output_file,first_line)
 
 def print_menu():
     print('1.  Preprocess Accounts')
@@ -105,6 +111,8 @@ if __name__ == '__main__':
             preprocess_input(ObjectType.pricereq, 10)
         if mode == 6:
             download_attachments(ObjectType.account, account)
+        if mode == 7:
+            download_attachments(ObjectType.activity, activity)
         if mode == 11:
             break
 
