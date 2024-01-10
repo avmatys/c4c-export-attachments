@@ -58,12 +58,8 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                 uuid = splitted_line[0]
                 id = splitted_line[1]
                 name = splitted_line[2]
-            if uuid is None or id is None or att_id is None:
-                continue
-            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
                 att_id = splitted_line[3]
-            else:
-                file_utils.write_to_file(log_path, f"{line}; 0")
+            if uuid is None or id is None or att_id is None:
                 continue
             # Store in collection
             keys.append(att_id)
