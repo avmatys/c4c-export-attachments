@@ -7,8 +7,8 @@ import file_utils
 from main import ObjectType, FolderType
 
 
-def mapping_line(account, attachment, att_path):
-    if attachment is None or account is None or "Name" not in attachment:
+def mapping_line(data, attachment, att_path):
+    if attachment is None or data is None or "Name" not in attachment:
         return ""
     att_name = attachment.get("Name", "")
     att_uuid = attachment.get("ObjectID", "")
@@ -23,17 +23,17 @@ def mapping_line(account, attachment, att_path):
     att_mime = attachment.get("MimeType", "")
     att_type = attachment.get("TypeCode", "")
     att_type_text = attachment.get("TypeCodeText", "")
-    uuid = account.get("ObjectID", "")
-    id = account.get("AccountID", "")
-    name = account.get("Name", "")
-    line = f"{att_path};{att_name};Account;{uuid};{id};{name};{att_uuid};{att_size};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type};{att_type_text}"
+    uuid = data.get("ObjectID", "")
+    id = data.get("ID", "")
+    name = data.get("Name", "")
+    line = f"{att_path};{att_name};Price Request;{uuid};{id};{name};{att_uuid};{att_size};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type};{att_type_text}"
     return line
 
 
 def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error_path="/", log_path="/", package=10):
     keys = []
-    key_lines = []
     key_data_map = {}
+    key_lines = []
     with open(keys_path, encoding="utf8") as fin:
         c4c_client = requests.session()
         lines = fin.readlines()
@@ -53,20 +53,26 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
             splitted_line = line.split(";")
             uuid = None
             id = None
+            att_id = None
             if len(splitted_line) > 2:
-                uuid = splitted_line[0].replace("-", "")
+                uuid = splitted_line[0]
                 id = splitted_line[1]
                 name = splitted_line[2]
-            if uuid is None or id is None:
+            if uuid is None or id is None or att_id is None:
+                continue
+            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
+                att_id = splitted_line[3]
+            else:
+                file_utils.write_to_file(log_path, f"{line}; 0")
                 continue
             # Store in collection
-            keys.append(uuid)
-            key_data_map[id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid}
+            keys.append(att_id)
+            key_data_map[att_id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid}
             key_lines.append(line)
             # Check if package should be processed
             if len(keys) == package or counter == 0:
                 # Read data from C4C
-                data = c4c.get_data(keys, ObjectType.account, c4c_client)
+                data = c4c.get_data(keys, ObjectType.attachment, c4c_client)
                 # Some error during read - store into the error area
                 if data is None:
                     for key_line in key_lines:
@@ -74,17 +80,20 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                     continue
                 # Iterate through data
                 for item in data:
-                    # Get line data
-                    item_id = item.get("AccountID", "")
-                    key_data = key_data_map.get(item_id, {})
+                    # Get line and price request id by attachment id from response
+                    resp_id = item.get("AttachmentID", "")
+                    if len(resp_id) == 0:
+                        continue
+                    key_data = key_data_map.get(resp_id, {})
+                    item_id = key_data.get("ID", "Not found")
                     key_line = key_data.get("line", "")
                     # Check if attachments exists
-                    if "CorporateAccountAttachmentFolder" not in item or len(
-                            item["CorporateAccountAttachmentFolder"]) == 0:
+                    if "AttachmentAttachmentFolder" not in item or len(
+                            item["AttachmentAttachmentFolder"]) == 0:
                         file_utils.write_to_file(log_path, f"{key_line}; 0")
                         continue
                     # Save data into the file
-                    atts = item["CorporateAccountAttachmentFolder"]
+                    atts = item["AttachmentAttachmentFolder"]
                     for att in atts:
                         file_content = att.get('Binary', None)
                         filename = att.get('Name', None)
@@ -100,8 +109,8 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                             with open(att_path, 'wb') as f:
                                 f.write(binary)
                         # Prepare mapping
-                        line = mapping_line(item, att, att_name)
-                        file_utils.write_to_file(mapping_path, f"{key_line}")
+                        map_line = mapping_line(key_data, att, att_name)
+                        file_utils.write_to_file(mapping_path, f"{map_line}")
                     # Save number of atts for customer
                     file_utils.write_to_file(log_path, f"{key_line}; {len(atts)}")
                 # Clear keys

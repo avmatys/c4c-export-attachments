@@ -2,9 +2,6 @@ from datetime import datetime, date
 import enum
 import threading
 
-import opportunity
-
-
 class ObjectType(enum.Enum):
     account = 1
     activity = 2
@@ -18,6 +15,7 @@ class ObjectType(enum.Enum):
     expertadvice = 10
     pilotbatch = 11
     specpaymentterms = 12
+    attachment = 13
 
 
 class Mode(enum.Enum):
@@ -38,8 +36,8 @@ class FolderType(enum.Enum):
 MODE = Mode.test
 
 import file_utils
-import account
-import activity
+import account, activity, opportunity, pricereq, techtask
+
 
 
 # Split big files in small pieces
@@ -75,6 +73,7 @@ def download_attachments(object_type, module):
     for thread in threads:
         thread.join()
 
+    # Merge splitted results in 1 file
     file_utils.merging_mapping_files(object_type, FolderType.output_mapping, FolderType.output_file)
 
 def print_menu():
@@ -118,6 +117,10 @@ if __name__ == '__main__':
             download_attachments(ObjectType.activity, activity)
         if mode == 8:
             download_attachments(ObjectType.oppty, opportunity)
+        if mode == 9:
+            download_attachments(ObjectType.techtask, techtask)
+        if mode == 10:
+            download_attachments(ObjectType.pricereq, pricereq)
         if mode == 11:
             break
 
