@@ -13,8 +13,8 @@ logging = setup_logger('c4cfile', 'c4c/api/file.log')
 HEADERS = {
     ObjectType.account.name: "AttachmentPath;AttachmentName;ObjectType;AccountUUID;AccountID;AccountName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText",
     ObjectType.activity.name: "AttachmentPath;AttachmentName;ObjectType;ActivityUUID;ActivityID;ActivityName;ActivityTypeCode;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode;TypeCodeText",
-    ObjectType.pricereq.name: "AttachmentPath;AttachmentName;ObjectType;PriceReqUUID;PriceReqID;PriceReqName;ActivityTypeCode;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode",
-    ObjectType.techtask.name: "AttachmentPath;AttachmentName;ObjectType;TechTaskUUID;TechTaskID;TechTaskName;ActivityTypeCode;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode",
+    ObjectType.pricereq.name: "AttachmentPath;AttachmentName;ObjectType;PriceReqUUID;PriceReqID;PriceReqName;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode",
+    ObjectType.techtask.name: "AttachmentPath;AttachmentName;ObjectType;TechTaskUUID;TechTaskID;TechTaskName;TechTaskTypeCode;AttachmentUUID;SizeInkB;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode",
     ObjectType.oppty.name: "AttachmentPath;AttachmentName;ObjectType;OppotrunityUUID;OpportunityID;OpportunityName;OpportunityTypeCode;OpportunityType;AttachmentUUID;AttachmentCreator;AttachmentCreationDate(UTC+0);DocumentLink;MimeType;TypeCode,Parameter",
 }
 

@@ -7,9 +7,10 @@ import file_utils
 from main import ObjectType, FolderType
 
 
-def mapping_line(data, attachment, att_path, att_type = ""):
+def mapping_line(data, attachment, att_path):
     if attachment is None or data is None or "Name" not in attachment:
         return ""
+    att_type = data.get("Type", "")
     att_type_name = ""
     if att_type == "tt":
         att_type_name = "Tech Task"
@@ -31,8 +32,8 @@ def mapping_line(data, attachment, att_path, att_type = ""):
     att_type = attachment.get("TypeCode", "")
     att_type_text = attachment.get("TypeCodeText", "")
     uuid = data.get("ObjectID", "")
-    id = data.get("ID_TT", "")
-    name = data.get("Name_TT", "")
+    id = data.get("ID", "")
+    name = data.get("Name", "")
     line = f"{att_path};{att_name};Tech Task;{uuid};{id};{name};{att_type_name};{att_uuid};{att_size};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type};{att_type_text}"
     return line
 
@@ -64,58 +65,72 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                 uuid = splitted_line[0].replace("-", "")
                 id = splitted_line[1]
                 name = splitted_line[2]
-            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
-                att_tt_id = splitted_line[3]
-            if len(splitted_line) > 4 and len(splitted_line[4]) > 0:
-                att_res_id = splitted_line[4]
-            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
-                att_gtt_id = splitted_line[5]
             if uuid is None or id is None:
                 continue
+                # Get keys and store in collection
+            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
+                att_tt_id = splitted_line[3]
+                keys.append(att_tt_id)
+                key_data_map[att_tt_id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid, "Type": "tt"}
+            if len(splitted_line) > 4 and len(splitted_line[4]) > 0:
+                att_res_id = splitted_line[4]
+                keys.append(att_res_id)
+                key_data_map[att_res_id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid, "Type": "res"}
+            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
+                att_gtt_id = splitted_line[5]
+                keys.append(att_gtt_id)
+                key_data_map[att_gtt_id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid, "Type": "gtt"}
             # Store in collection
-            keys.append(uuid)
+            key_lines.append(line)
             # Check if package should be processed
             if len(keys) == package or counter == 0:
                 # Read data from C4C
-                data = c4c.get_data(keys, ObjectType.account, c4c_client)
-                keys.clear()
+                data = c4c.get_data(keys, ObjectType.attachment, c4c_client)
                 # Some error during read - store into the error area
                 if data is None:
                     for key_line in key_lines:
-                        file_utils.write_to_file(error_path, f"{key_line}, Check logs in c4c/api/logging.log")
+                        file_utils.write_to_file(error_path, f"{key_line};;Check logs in c4c/api/logging.log")
                     continue
                 # Iterate through data
                 for item in data:
+                    # Get line and tech task id by attachment id from response
+                    resp_id = item.get("AttachmentID", "")
+                    if len(resp_id) == 0:
+                        continue
+                    key_data = key_data_map.get(resp_id, {})
+                    key_type = key_data.get("Type","")
+                    item_id = key_data.get("ID", "Not found")
+                    key_line = key_data.get("line", "")
                     # Check if attachments exists
-                    att_count = 0
-                    attTT = item.get("AttachmentAttachmentFolder_TT", [])
-                    attRes = item.get("AttachmentAttachmentFolder_Res", [])
-                    attGTT = item.get("AttachmentAttachmentFolder_GTT", [])
-                    att_count = len(attGTT) + len(attTT) + len(attRes)
-                    if att_count == 0:
-                        file_utils.write_to_file(log_path, f"{line}; 0")
+                    if "AttachmentAttachmentFolder" not in item or len(
+                            item["AttachmentAttachmentFolder"]) == 0:
+                        file_utils.write_to_file(log_path, f"{key_line};{key_type};0")
                         continue
                     # Save data into the file
-                    atts = { "tt" : attTT, "res" : attRes, "gtt" : attGTT }
-                    for att_type, att in atts.items():
+                    atts = item["AttachmentAttachmentFolder"]
+                    for att in atts:
                         file_content = att.get('Binary', None)
                         filename = att.get('Name', None)
                         mime_code = att.get('MimeType', None)
                         if file_content is None or filename is None:
-                            file_utils.write_to_file(error_path, f"{line}, Binary is not available")
+                            file_utils.write_to_file(error_path, f"{key_line};{key_type};Binary is not available")
                             continue
-                        att_name = f"{id}_{att_type}_{filename}"
+                        att_name = f"{item_id}_{key_type}_{filename}"
                         att_path = f"{file_folder}/{att_name}"
                         binary = base64.b64decode(file_content)
                         # Skip links (urls)
                         if mime_code is not None and len(mime_code) > 0:
-                           with open(att_path, 'wb') as f:
+                            with open(att_path, 'wb') as f:
                                 f.write(binary)
                         # Prepare mapping
-                        line = mapping_line(item, att, att_name, att_type)
-                        file_utils.write_to_file(mapping_path, f"{line}")
-                    # Save number of atts for tech task
-                    file_utils.write_to_file(log_path, f"{line}; {att_count}")
+                        map_line = mapping_line(key_data, att, att_name)
+                        file_utils.write_to_file(mapping_path, f"{map_line}")
+                    # Save number of atts
+                    file_utils.write_to_file(log_path, f"{key_line};{key_type};{len(atts)}")
+                # Clear keys
+                keys.clear()
+                key_data_map.clear()
+                key_lines.clear()
 
 
 if __name__ == '__main__':
