@@ -6,6 +6,16 @@ import c4c
 import file_utils
 from main import ObjectType
 
+TECH_NAMES = {
+    ObjectType.charinoopty.name: "сharinoppty",
+    ObjectType.detspecifhistory.name: "detspechistory",
+    ObjectType.specifhistory.name: " specifhistory",
+    ObjectType.discountinoopty.name: "discountinOppty",
+    ObjectType.expertadvice.name: "expertadvice",
+    ObjectType.pilotbatch.name: "pilotbatch",
+    ObjectType.specpaymentterms.name: "specpaymentterms"
+}
+
 PARAMETERS = {
     ObjectType.charinoopty.name: "Characteristics in oppty",
     ObjectType.detspecifhistory.name: "Det spec history",
@@ -15,7 +25,6 @@ PARAMETERS = {
     ObjectType.pilotbatch.name: "Pilot batch",
     ObjectType.specpaymentterms.name: "Spec payment terms"
 }
-
 
 def mapping_line(object, attachment, att_path, object_type_name):
     if attachment is None or object is None or "Name" not in attachment:
@@ -38,13 +47,13 @@ def mapping_line(object, attachment, att_path, object_type_name):
     name = ""
     type_code = ""
     type_desc = ""
-    if object_type_name == 'oppty':
+    if object_type_name == "Opportunity":
         id = object.get("ID", "")
         name = object.get("Name", "")
         type_code = object.get("ProcessingTypeCode", "")
         type_desc = object.get("ProcessingTypeCodeText", "")
     parameter = object_type_name
-    line = f"{att_path};{att_name};{uuid};{id};{name};{type_code};{type_desc};{att_uuid};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type}"
+    line = f"{att_path};{att_name};Opportunity;{uuid};{id};{name};{type_code};{type_desc};{att_uuid};{att_creator};{att_creation_date_form};{att_link};{att_mime};{att_type};{object_type_name}"
     return line
 
 
@@ -94,22 +103,22 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                     continue
                 # Iterate through data
                 for item in data:
-                    # Check if attachments exists
-                    if "OpportunityAttachmentFolder" not in item or len(
-                            item["OpportunityAttachmentFolder"]) == 0:
-                        file_utils.write_to_file(log_path, f"{line}; Oppty; 0")
-                        continue
-                    # Save data into the file
-                    atts = item["OpportunityAttachmentFolder"]
                     item_id = item.get("ID", None)
                     key_data = key_data_map.get(item_id, {})
                     key_line = key_data.get("line", "")
+                    # Check if attachments exists
+                    if "OpportunityAttachmentFolder" not in item or len(
+                            item["OpportunityAttachmentFolder"]) == 0:
+                        file_utils.write_to_file(log_path, f"{key_line}; oppty; 0")
+                        continue
+                    # Save data into the file
+                    atts = item["OpportunityAttachmentFolder"]
                     for att in atts:
                         file_content = att.get('Binary', None)
                         filename = att.get('Name', None)
                         mime_code = att.get('MimeType', None)
                         if file_content is None or filename is None:
-                            file_utils.write_to_file(error_path, f"{key_line}; Oppty; Binary is not available")
+                            file_utils.write_to_file(error_path, f"{key_line}; oppty; Binary is not available")
                             continue
                         att_name = f"{item_id}_oppty_{filename}"
                         att_path = f"{file_folder}/{att_name}"
@@ -119,106 +128,88 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                             with open(att_path, 'wb') as f:
                                 f.write(binary)
                         # Prepare mapping
-                        line = mapping_line(item, att, att_name, ObjectType.oppty.name)
-                        file_utils.write_to_file(mapping_path, f"{key_line}")
+                        map_line = mapping_line(item, att, att_name, "Opportunity")
+                        file_utils.write_to_file(mapping_path, f"{map_line}")
                     # Save number of atts for customer
-                    file_utils.write_to_file(log_path, f"{key_line}; Oppty; {len(atts)}")
+                    file_utils.write_to_file(log_path, f"{key_line}; oppty; {len(atts)}")
 
                 # Clear collections
                 keys.clear()
-                key_data_map.clear()
                 key_lines.clear()
 
-            counter = len(lines)
-            alllines = counter
+            # Get attachment ids for oppty id
+            charinoopty_data = c4c.get_data(keys_oppty_id, ObjectType.charinoopty, c4c_client)
+            detspecifhistory_data = c4c.get_data(keys_oppty_id, ObjectType.detspecifhistory, c4c_client)
+            specifhistory_data = c4c.get_data(keys_oppty_id, ObjectType.specifhistory, c4c_client)
+            discountinoopty_data = c4c.get_data(keys_oppty_id, ObjectType.discountinoopty, c4c_client)
+            expertadvice_data = c4c.get_data(keys_oppty_id, ObjectType.expertadvice, c4c_client)
+            pilotbatch_data = c4c.get_data(keys_oppty_id, ObjectType.pilotbatch, c4c_client)
+            specpaymentterms_data = c4c.get_data(keys_oppty_id, ObjectType.specpaymentterms, c4c_client)
 
-            # Iterate by oppty
-            for i, line in enumerate(lines):
+            data_of_all_objects = {ObjectType.charinoopty: charinoopty_data,
+                                   ObjectType.specifhistory: specifhistory_data,
+                                   ObjectType.discountinoopty: discountinoopty_data,
+                                   ObjectType.expertadvice: expertadvice_data,
+                                   ObjectType.pilotbatch: pilotbatch_data,
+                                   ObjectType.specpaymentterms: specpaymentterms_data,
+                                   ObjectType.detspecifhistory: detspecifhistory_data}
 
-                # Prepare line
-                line = line.rstrip()
-
-                # Skip header
-                if i == 0:
-                    continue
-
-                # Get oppty id
-                splitted_line = line.split(";")
-                oppty_id = []
-                item_oppty_id = ''
-                if len(splitted_line) > 1:
-                    oppty_id.append(splitted_line[1])
-                    item_oppty_id = splitted_line[1]
-
-                # Get attachment ids for oppty id
-                charinoopty_data = c4c.get_data(oppty_id, ObjectType.charinoopty, c4c_client)
-                detspecifhistory_data = c4c.get_data(oppty_id, ObjectType.detspecifhistory, c4c_client)
-                specifhistory_data = c4c.get_data(oppty_id, ObjectType.specifhistory, c4c_client)
-                discountinoopty_data = c4c.get_data(oppty_id, ObjectType.discountinoopty, c4c_client)
-                expertadvice_data = c4c.get_data(oppty_id, ObjectType.expertadvice, c4c_client)
-                pilotbatch_data = c4c.get_data(oppty_id, ObjectType.pilotbatch, c4c_client)
-                specpaymentterms_data = c4c.get_data(oppty_id, ObjectType.specpaymentterms, c4c_client)
-
-                data_of_all_objects = {ObjectType.charinoopty: charinoopty_data,
-                                       ObjectType.specifhistory: specifhistory_data,
-                                       ObjectType.discountinoopty: discountinoopty_data,
-                                       ObjectType.expertadvice: expertadvice_data,
-                                       ObjectType.pilotbatch: pilotbatch_data,
-                                       ObjectType.specpaymentterms: specpaymentterms_data,
-                                       ObjectType.detspecifhistory: detspecifhistory_data}
-
-                # Store attachment ids into one collection of key
-                key_att_id = []
-                key_data_map = {}
-                for key, value in data_of_all_objects.items():
-                    for item in value:
-                        attachment_id = item.get('AttachmentID', None)
-                        key_att_id.append(attachment_id)
-                        key_data_map[attachment_id] = {"ObjectType" : PARAMETERS.get(key.name, ""), "ID" : item_oppty_id, "line" : line}
-                # Get attachment data by attachment keys
-                attchments_data = c4c.get_data(key_att_id, ObjectType.attachment, c4c_client)
-
-                if attchments_data is None:
-                    for key_line in key_lines:
-                        file_utils.write_to_file(error_path, f"{line}, Check logs in c4c/api/logging.log")
-                    continue
-
-                # Process response
-                for item in attchments_data:
-
-                    att_id = item.get('AttachmentID', None)
-                    key_data = key_data_map.get(att_id, {})
+            # Store attachment ids into one collection of key
+            key_att_id = []
+            key_objects_data_map = {}
+            for key, value in data_of_all_objects.items():
+                for item in value:
+                    attachment_id = item.get('AttachmentID', "")
+                    opportunity_id = item.get('OpportunityID', "")
+                    key_data = key_data_map.get(opportunity_id, {})
                     key_line = key_data.get("line", "")
-                    objectType = key_data.get("ObjectType","")
-                    oppt_id = key_data_map.get("ID","")
+                    key_att_id.append(attachment_id)
+                    key_objects_data_map[attachment_id] = {"Parameter" : PARAMETERS.get(key.name, ""), "TechName" : TECH_NAMES.get(key.name, ""),"OpportunityID" : opportunity_id, "line" : key_line}
 
-                    # Check if attachments exists
-                    if "AttachmentAttachmentFolder" not in item or len(
-                            item["AttachmentAttachmentFolder"]) == 0:
-                        file_utils.write_to_file(log_path, f"{line};{objectType}; 0")
+            # Get attachment data by attachment keys
+            attchments_data = c4c.get_data(key_att_id, ObjectType.attachment, c4c_client)
+
+            if attchments_data is None:
+                for key_line in key_lines:
+                    file_utils.write_to_file(error_path, f"{line}, Check logs in c4c/api/logging.log")
+                continue
+
+            # Process response
+            for item in attchments_data:
+
+                att_id = item.get('AttachmentID', "")
+                key_data = key_objects_data_map.get(att_id, {})
+                key_line = key_data.get("line", "")
+                parameter = key_data.get("Parameter","")
+                tech_name = key_data.get("TechName","")
+                oppt_id = key_data.get("OpportunityID","")
+
+                # Check if attachments exists
+                if "AttachmentAttachmentFolder" not in item or len(
+                        item["AttachmentAttachmentFolder"]) == 0:
+                    file_utils.write_to_file(log_path, f"{line};{parameter}; 0")
+                    continue
+                # Save data into the file
+                atts = item["AttachmentAttachmentFolder"]
+                for att in atts:
+                    file_content = att.get('Binary', None)
+                    filename = att.get('Name', None)
+                    mime_code = att.get('MimeType', None)
+                    if file_content is None or filename is None:
+                        file_utils.write_to_file(error_path, f"{key_line};{parameter}; Binary is not available")
                         continue
-                    # Save data into the file
-                    atts = item["AttachmentAttachmentFolder"]
-                    for att in atts:
-                        file_content = att.get('Binary', None)
-                        filename = att.get('Name', None)
-                        mime_code = att.get('MimeType', None)
-                        if file_content is None or filename is None:
-                            file_utils.write_to_file(error_path, f"{key_line};{objectType}; Binary is not available")
-                            continue
-                        att_name = f"{oppt_id}_{objectType}_{filename}"
-                        parameter = PARAMETERS.get(key.name, "")
-                        att_path = f"{file_folder}/{att_name}"
-                        binary = base64.b64decode(file_content)
-                        # Skip links (urls)
-                        if mime_code is not None and len(mime_code) > 0:
-                            with open(att_path, 'wb') as f:
-                                f.write(binary)
-                        # Prepare mapping
-                        map_line = mapping_line(item, att, att_name, objectType)
-                        file_utils.write_to_file(mapping_path, f"{map_line}")
-                    # Save number of atts for customer
-                    file_utils.write_to_file(log_path, f"{key_line};{objectType};{len(atts)}")
+                    att_name = f"{oppt_id}_{tech_name}_{filename}"
+                    att_path = f"{file_folder}/{att_name}"
+                    binary = base64.b64decode(file_content)
+                    # Skip links (urls)
+                    if mime_code is not None and len(mime_code) > 0:
+                        with open(att_path, 'wb') as f:
+                            f.write(binary)
+                    # Prepare mapping
+                    map_line = mapping_line(item, att, att_name, parameter)
+                    file_utils.write_to_file(mapping_path, f"{map_line}")
+                # Save number of atts for customer
+                file_utils.write_to_file(log_path, f"{key_line};{parameter};{len(atts)}")
 
 
 if __name__ == '__main__':
