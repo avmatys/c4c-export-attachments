@@ -68,7 +68,6 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
             if len(keys) == package or counter == 0:
                 # Read data from C4C
                 data = c4c.get_data(keys, ObjectType.activity, c4c_client)
-                keys.clear()
                 # Some error during read - store into the error area
                 if data is None:
                     for key_line in key_lines:
@@ -78,12 +77,13 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                 for item in data:
                     # Get line data
                     item_id = item.get("ID", "")
+                    activity_type = item.get("TypeCode", "")
                     key_data = key_data_map.get(item_id, {})
                     key_line = key_data.get("line", "")
                     # Check if attachments exists
                     if "ActivityAttachmentFolder" not in item or len(
                             item["ActivityAttachmentFolder"]) == 0:
-                        file_utils.write_to_file(log_path, f"{key_line}; 0")
+                        file_utils.write_to_file(log_path, f"{key_line};{activity_type};0")
                         continue
                     # Save data into the file
                     atts = item["ActivityAttachmentFolder"]
@@ -92,9 +92,9 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                         filename = att.get('Name', None)
                         mime_code = att.get('MimeType', None)
                         if file_content is None or filename is None:
-                            file_utils.write_to_file(error_path, f"{key_line}, Binary is not available")
+                            file_utils.write_to_file(error_path, f"{key_line};{activity_type};Binary is not available")
                             continue
-                        att_name = f"{item_id}_{filename}"
+                        att_name = f"{item_id}_{activity_type}_{filename}"
                         att_path = f"{file_folder}/{att_name}"
                         binary = base64.b64decode(file_content)
                         # Skip links (urls)
@@ -102,10 +102,10 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                            with open(att_path, 'wb') as f:
                                 f.write(binary)
                         # Prepare mapping
-                        line = mapping_line(item, att, att_name)
-                        file_utils.write_to_file(mapping_path, f"{key_line}")
+                        map_line = mapping_line(item, att, att_name)
+                        file_utils.write_to_file(mapping_path, f"{map_line}")
                     # Save number of atts for customer
-                    file_utils.write_to_file(log_path, f"{key_line}; {len(atts)}")
+                    file_utils.write_to_file(log_path, f"{key_line};{activity_type};{len(atts)}")
                 # Clear keys
                 keys.clear()
                 key_data_map.clear()

@@ -100,8 +100,8 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                             with open(att_path, 'wb') as f:
                                 f.write(binary)
                         # Prepare mapping
-                        line = mapping_line(item, att, att_name)
-                        file_utils.write_to_file(mapping_path, f"{key_line}")
+                        map_line = mapping_line(item, att, att_name)
+                        file_utils.write_to_file(mapping_path, f"{map_line}")
                     # Save number of atts for customer
                     file_utils.write_to_file(log_path, f"{key_line}; {len(atts)}")
                 # Clear keys
