@@ -157,6 +157,7 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                                        ObjectType.pilotbatch: pilotbatch_data,
                                        ObjectType.specpaymentterms: specpaymentterms_data,
                                        ObjectType.detspecifhistory: detspecifhistory_data}
+                # data_of_all_objects = {ObjectType.specpaymentterms: specpaymentterms_data}
 
                 # Store attachment ids into one collection of key
                 key_att_id = []
@@ -198,7 +199,7 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                 ATT_PACKAGE = 2 * package
                 start = 0
                 end = ATT_PACKAGE
-
+                key_att_id = list(set(key_att_id))
                 while 1:
                     print(f"Start {start} End {end} All {att_count}")
                     if start >= att_count:
