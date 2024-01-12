@@ -123,9 +123,12 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                     # Save data into the file
                     atts = item["OpportunityAttachmentFolder"]
                     for att in atts:
-                        file_content = att.get('Binary', None)
-                        filename = att.get('Name', None)
-                        mime_code = att.get('MimeType', None)
+                        file_content = att.get('Binary', "")
+                        filename = att.get('Name', "")
+                        mime_code = att.get('MimeType', "")
+                        type_code = att.get('TypeCode', "")
+                        if type_code == "10051" and len(mime_code.rstrip()) == 0:
+                            filename = att.get('Title', "")
                         if file_content is None or filename is None:
                             file_utils.write_to_file(error_path, f"{key_line}; oppty; Binary is not available")
                             continue

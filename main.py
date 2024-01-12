@@ -107,7 +107,7 @@ if __name__ == '__main__':
         if mode == 3:
             preprocess_input(ObjectType.oppty, 10)
         if mode == 4:
-            preprocess_input(ObjectType.techtask, 500)
+            preprocess_input(ObjectType.techtask, 250)
         if mode == 5:
             preprocess_input(ObjectType.pricereq, 10)
         if mode == 6:
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         if mode == 8:
             download_attachments(ObjectType.oppty, opportunity)
         if mode == 9:
-            download_attachments(ObjectType.techtask, techtask, 1)
+            download_attachments(ObjectType.techtask, techtask, 5)
         if mode == 10:
             download_attachments(ObjectType.pricereq, pricereq)
         if mode == 11:
