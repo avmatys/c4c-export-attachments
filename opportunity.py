@@ -59,7 +59,7 @@ def mapping_line(object, attachment, att_path, object_type_name):
     return line
 
 
-def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error_path="/", log_path="/", package=10):
+def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error_path="/", log_path="/", package_size=10):
     keys = []
     keys_oppty_id = []
     key_data_map = {}
@@ -196,7 +196,7 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
 
                 # Get max lenght
                 att_count = len(key_att_id)
-                ATT_PACKAGE = 2 * package
+                ATT_PACKAGE = package_size
                 start = 0
                 end = ATT_PACKAGE
                 key_att_id = list(set(key_att_id))

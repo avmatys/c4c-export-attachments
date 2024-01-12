@@ -33,11 +33,10 @@ class FolderType(enum.Enum):
 
 
 # Enable test mode
-MODE = Mode.test
+MODE = Mode.prod
 
 import file_utils
 import account, activity, opportunity, pricereq, techtask
-
 
 
 # Split big files in small pieces
@@ -108,7 +107,7 @@ if __name__ == '__main__':
         if mode == 3:
             preprocess_input(ObjectType.oppty, 10)
         if mode == 4:
-            preprocess_input(ObjectType.techtask, 10)
+            preprocess_input(ObjectType.techtask, 500)
         if mode == 5:
             preprocess_input(ObjectType.pricereq, 10)
         if mode == 6:
@@ -118,7 +117,7 @@ if __name__ == '__main__':
         if mode == 8:
             download_attachments(ObjectType.oppty, opportunity)
         if mode == 9:
-            download_attachments(ObjectType.techtask, techtask)
+            download_attachments(ObjectType.techtask, techtask, 5)
         if mode == 10:
             download_attachments(ObjectType.pricereq, pricereq)
         if mode == 11:

@@ -38,12 +38,11 @@ def mapping_line(data, attachment, att_path):
     return line
 
 
-def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error_path="/", log_path="/", package=10):
+def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error_path="/", log_path="/", package_size=10):
     keys = []
     key_data_map = {}
     key_lines = []
     with open(keys_path, encoding="utf8") as fin:
-        c4c_client = requests.session()
         lines = fin.readlines()
         counter = len(lines)
         alllines = counter
@@ -68,28 +67,33 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
             if uuid is None or id is None:
                 continue
                 # Get keys and store in collection
-            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
-                att_tt_id = splitted_line[3]
+            if len(splitted_line) > 3 and len(splitted_line[3].rstrip()) > 0:
+                att_tt_id = splitted_line[3].rstrip()
                 keys.append(att_tt_id)
                 key_data_map[att_tt_id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid, "Type": "tt"}
-            if len(splitted_line) > 4 and len(splitted_line[4]) > 0:
-                att_res_id = splitted_line[4]
+            if len(splitted_line) > 4 and len(splitted_line[4].rstrip()) > 0:
+                att_res_id = splitted_line[4].rstrip()
                 keys.append(att_res_id)
                 key_data_map[att_res_id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid, "Type": "res"}
-            if len(splitted_line) > 3 and len(splitted_line[3]) > 0:
-                att_gtt_id = splitted_line[5]
+            if len(splitted_line) > 5 and len(splitted_line[5].rstrip()) > 0:
+                att_gtt_id = splitted_line[5].rstrip()
                 keys.append(att_gtt_id)
                 key_data_map[att_gtt_id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid, "Type": "gtt"}
             # Store in collection
             key_lines.append(line)
+            keys = list(set(keys))
             # Check if package should be processed
-            if len(keys) == package or counter == 0:
+            if len(key_lines) >= package_size or counter == 0:
                 # Read data from C4C
+                c4c_client = requests.session()
                 data = c4c.get_data(keys, ObjectType.attachment, c4c_client)
                 # Some error during read - store into the error area
                 if data is None:
                     for key_line in key_lines:
                         file_utils.write_to_file(error_path, f"{key_line};;Check logs in c4c/api/logging.log")
+                    keys.clear()
+                    key_data_map.clear()
+                    key_lines.clear()
                     continue
                 # Iterate through data
                 for item in data:

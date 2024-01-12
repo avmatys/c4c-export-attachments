@@ -31,7 +31,7 @@ def mapping_line(activity, attachment, att_path):
     return line
 
 
-def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error_path="/", log_path="/", package=10):
+def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error_path="/", log_path="/", package_size=10):
     keys = []
     key_lines = []
     key_data_map = {}
@@ -65,13 +65,17 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
             key_data_map[id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid}
             key_lines.append(line)
             # Check if package should be processed
-            if len(keys) == package or counter == 0:
+            if len(keys) >= package_size or counter == 0:
                 # Read data from C4C
                 data = c4c.get_data(keys, ObjectType.activity, c4c_client)
                 # Some error during read - store into the error area
                 if data is None:
                     for key_line in key_lines:
                         file_utils.write_to_file(error_path, f"{key_line}, Check logs in c4c/api/logging.log")
+                    # Clear keys
+                    keys.clear()
+                    key_data_map.clear()
+                    key_lines.clear()
                     continue
                 # Iterate through data
                 for item in data:
