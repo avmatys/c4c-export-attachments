@@ -30,7 +30,12 @@ PARAMETERS = {
 def mapping_line(object, attachment, att_path, object_type_name):
     if attachment is None or object is None or "Name" not in attachment:
         return ""
+
     att_name = attachment.get("Name", "")
+    att_mime = attachment.get("MimeType", "")
+    att_type = attachment.get("TypeCode", "")
+    if att_type == "10051" and len(att_mime.rstrip()) == 0:
+        att_name = attachment.get('Title', "")
     att_uuid = attachment.get("ObjectID", "")
     att_size = attachment.get("SizeInkB", "")
     att_creation_date = attachment.get("LastUpdatedOn", "")
@@ -40,8 +45,8 @@ def mapping_line(object, attachment, att_path, object_type_name):
     att_creation_date_form = datetime.utcfromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
     att_creator = attachment.get("LastUpdatedBy", "")
     att_link = attachment.get("DocumentLink", "")
-    att_mime = attachment.get("MimeType", "")
-    att_type = attachment.get("TypeCode", "")
+    if att_type == "10051" and len(att_mime.rstrip()) == 0:
+        att_link = attachment.get('LinkWebURI', "")
     att_type_text = attachment.get("TypeCodeText", "")
     uuid = object.get("ObjectID", "")
     id, name, type_code, subobjectuuid = "", "", "", ""
@@ -95,7 +100,7 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
             key_data_map[id] = {"line": line, "ID": id, "Name": name, "ObjectID": uuid, "TypeCode": ""}
             key_lines.append(line)
             # Check if package should be processed
-            if len(keys) == package or counter == 0:
+            if len(keys) == package_size or counter == 0:
                 # Read data from C4C
                 data = c4c.get_data(keys, ObjectType.oppty, c4c_client)
                 # Some error during read - store into the error area
@@ -238,9 +243,12 @@ def download_attachments(keys_path="/", file_folder="/", mapping_path="/", error
                         # Save data into the file
                         atts = item["AttachmentAttachmentFolder"]
                         for att in atts:
-                            file_content = att.get('Binary', None)
-                            filename = att.get('Name', None)
-                            mime_code = att.get('MimeType', None)
+                            file_content = att.get('Binary', "")
+                            filename = att.get('Name', "")
+                            mime_code = att.get('MimeType', "")
+                            type_code = att.get('TypeCode', "")
+                            if type_code == "10051" and len(mime_code.rstrip()) == 0:
+                                filename = att.get('Title', "")
                             if file_content is None or filename is None:
                                 file_utils.write_to_file(error_path, f"{key_line};{parameter}; Binary is not available")
                                 continue

@@ -46,7 +46,7 @@ def preprocess_input(object_type, package=10000):
 
 
 # Download
-def download_attachments(object_type, module, package=10):
+def download_attachments(object_type, module, package_size=10):
     # Prepare threads
     threads = []
     # Get all files from dir
@@ -64,7 +64,7 @@ def download_attachments(object_type, module, package=10):
 
         thread = threading.Thread(target=module.download_attachments, name=f,
                                   args=(f"{input_path}/{f}", file_path, f"{mapping_path}/{f}", f"{error_path}/{f}",
-                                        f"{log_path}/{f}", package))
+                                        f"{log_path}/{f}", package_size))
         threads.append(thread)
         thread.start()
 
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         if mode == 8:
             download_attachments(ObjectType.oppty, opportunity)
         if mode == 9:
-            download_attachments(ObjectType.techtask, techtask, 5)
+            download_attachments(ObjectType.techtask, techtask, 1)
         if mode == 10:
             download_attachments(ObjectType.pricereq, pricereq)
         if mode == 11:
