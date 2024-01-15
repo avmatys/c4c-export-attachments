@@ -11,14 +11,14 @@ logging = setup_logger('c4capi', 'c4c/api/logging.log')
 #logging.basicConfig(level=logging.INFO, filename="c4c/api/logging.log", filemode="a",
 #                    format="%(asctime)s;%(levelname)s;%(message)s;")
 
-auth = 'am1', 'Password1234'
+auth = 'X', 'X'
 
 URLS = {
     Mode.test.name: {
-        ObjectType.account.name: "https://my327208.crm.ondemand.com/sap/c4c/odata/v1/c4codataapi/CorporateAccountCollection?$filter={filter}&$select=AccountID,Name,ObjectID,CorporateAccountAttachmentFolder/ObjectID,CorporateAccountAttachmentFolder/SizeInkB,CorporateAccountAttachmentFolder/LastUpdatedBy,CorporateAccountAttachmentFolder/LastUpdatedOn,CorporateAccountAttachmentFolder/DocumentLink,CorporateAccountAttachmentFolder/TypeCode,CorporateAccountAttachmentFolder/TypeCodeText,CorporateAccountAttachmentFolder/MimeType,CorporateAccountAttachmentFolder/Binary,CorporateAccountAttachmentFolder/Name&$expand=CorporateAccountAttachmentFolder&$format=json"
+        ObjectType.account.name: "https://myXXXXXX.crm.ondemand.com/sap/c4c/odata/v1/c4codataapi/CorporateAccountCollection?$filter={filter}&$select=AccountID,Name,ObjectID,CorporateAccountAttachmentFolder/ObjectID,CorporateAccountAttachmentFolder/SizeInkB,CorporateAccountAttachmentFolder/LastUpdatedBy,CorporateAccountAttachmentFolder/LastUpdatedOn,CorporateAccountAttachmentFolder/DocumentLink,CorporateAccountAttachmentFolder/TypeCode,CorporateAccountAttachmentFolder/TypeCodeText,CorporateAccountAttachmentFolder/MimeType,CorporateAccountAttachmentFolder/Binary,CorporateAccountAttachmentFolder/Name&$expand=CorporateAccountAttachmentFolder&$format=json"
     },
     Mode.prod.name: {
-        ObjectType.account.name: "https://my336064.crm.ondemand.com/sap/c4c/odata/v1/c4codataapi/CorporateAccountCollection?$filter={key}&$select=AccountID,Name,ObjectID,CorporateAccountAttachmentFolder/ObjectID,CorporateAccountAttachmentFolder/SizeInkB,CorporateAccountAttachmentFolder/LastUpdatedBy,CorporateAccountAttachmentFolder/LastUpdatedOn,CorporateAccountAttachmentFolder/DocumentLink,CorporateAccountAttachmentFolder/TypeCode,CorporateAccountAttachmentFolder/TypeCodeText,CorporateAccountAttachmentFolder/MimeType,CorporateAccountAttachmentFolder/Binary,CorporateAccountAttachmentFolder/Name&$expand=CorporateAccountAttachmentFolder&$format=json"
+        ObjectType.account.name: "https://myXXXXXX.crm.ondemand.com/sap/c4c/odata/v1/c4codataapi/CorporateAccountCollection?$filter={key}&$select=AccountID,Name,ObjectID,CorporateAccountAttachmentFolder/ObjectID,CorporateAccountAttachmentFolder/SizeInkB,CorporateAccountAttachmentFolder/LastUpdatedBy,CorporateAccountAttachmentFolder/LastUpdatedOn,CorporateAccountAttachmentFolder/DocumentLink,CorporateAccountAttachmentFolder/TypeCode,CorporateAccountAttachmentFolder/TypeCodeText,CorporateAccountAttachmentFolder/MimeType,CorporateAccountAttachmentFolder/Binary,CorporateAccountAttachmentFolder/Name&$expand=CorporateAccountAttachmentFolder&$format=json"
     }
 }
 
